@@ -1,0 +1,25 @@
+name: Crash test on OS X
+on:
+  push:
+
+
+jobs:
+  crash:
+    name: Build and run
+    runs-on: macos-13
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Test access to core dump directory
+      run: |
+        sudo chmod 777 /cores
+    - name: Build and run
+      run: |
+        ulimit -c unlimited
+        make
+        make run
+    - name: Check coredumps
+      if: always()
+      run: |
+        ls -l /cores
+        lldb --core `ls /cores/core.*` --batch --one-line "bt"
